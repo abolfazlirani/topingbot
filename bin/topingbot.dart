@@ -80,7 +80,7 @@ z3u5SNF6
   final jwt = JWT(
     {
       'iss': issuerId,
-      'exp': (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 3600,
+      'exp': (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 1200,
       'aud': 'appstoreconnect-v1'
     },
   );
