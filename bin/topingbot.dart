@@ -1,22 +1,89 @@
+import 'dart:convert';
 import 'package:televerse/televerse.dart';
+import 'package:http/http.dart' as http;
+import 'package:crypto/crypto.dart';
+import 'package:jose/jose.dart';
 
 void main() {
-  // توکن ربات تلگرام خود را وارد کنید
-  final bot = Bot('7830294069:AAHWZLtw7-xfewH0JJ_l8W-oWUa0Gg6BKEM');
+  final bot = Bot('YOUR_BOT_TOKEN');
 
-  // تعریف دستور /start
   bot.command('start', (ctx) {
-    ctx.reply('سلام! به ربات تلگرام خوش آمدید.');
+    ctx.reply('سلام! ایمیل خود را وارد کنید تا دعوت‌نامه تست‌فلایت دریافت کنید.');
   });
 
-  // تعریف دستور /echo
-  bot.command('echo', (ctx) {
-    if (ctx.message!.text != null) {
-      String userMessage = ctx.message!.text!.replaceFirst('/echo', '').trim();
-      ctx.reply(userMessage.isNotEmpty ? userMessage : 'متنی وارد نشده است!');
+  bot.onMessage((ctx) async {
+    String? email = ctx.message?.text;
+    if (email != null && email.contains('@')) {
+      ctx.reply('ایمیل شما ثبت شد. ارسال دعوت‌نامه...');
+
+      bool success = await sendInvitationToTestFlight(email);
+      if (success) {
+        ctx.reply('دعوت‌نامه به ایمیل $email ارسال شد!');
+      } else {
+        ctx.reply('مشکلی در ارسال دعوت‌نامه پیش آمد. لطفاً دوباره تلاش کنید.');
+      }
+    } else {
+      ctx.reply('لطفاً یک ایمیل معتبر وارد کنید.');
     }
   });
 
-  // راه‌اندازی ربات
   bot.start();
+}
+
+Future<bool> sendInvitationToTestFlight(String email) async {
+  final url = 'https://api.appstoreconnect.apple.com/v1/betaTesters';
+  String token = generateJwtToken();
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      "data": {
+        "type": "betaTesters",
+        "attributes": {
+          "email": email,
+          "firstName": "Test",
+          "lastName": "User"
+        },
+        "relationships": {
+          "betaGroups": {
+            "data": [
+              {"type": "betaGroups", "id": "BETA_GROUP_ID"}
+            ]
+          }
+        }
+      }
+    }),
+  );
+
+  return response.statusCode == 201;
+}
+
+String generateJwtToken() {
+  final keyId = 'YOUR_KEY_ID';
+  final issuerId = 'YOUR_ISSUER_ID';
+  final privateKey = 'YOUR_PRIVATE_KEY';
+
+  final header = {
+    'alg': 'ES256',
+    'kid': keyId,
+    'typ': 'JWT',
+  };
+
+  final claims = {
+    'iss': issuerId,
+    'exp': (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 3600,
+    'aud': 'appstoreconnect-v1'
+  };
+
+  final jws = JsonWebSignatureBuilder()
+    ..jsonContent = claims
+    ..setProtectedHeader('alg', 'ES256')
+    ..addRecipient(JsonWebKey.fromPem(privateKey, keyId: keyId));
+
+  final jwt = jws.build().toCompactSerialization();
+  return jwt;
 }
