@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:jose/jose.dart';
 
 void main() {
-  final bot = Bot('YOUR_BOT_TOKEN');
+  final bot = Bot('7830294069:AAHWZLtw7-xfewH0JJ_l8W-oWUa0Gg6BKEM');
 
   bot.command('start', (ctx) {
     ctx.reply('سلام! ایمیل خود را وارد کنید تا دعوت‌نامه تست‌فلایت دریافت کنید.');
