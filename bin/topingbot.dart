@@ -63,9 +63,14 @@ Future<bool> sendInvitationToTestFlight(String email) async {
 }
 
 String generateJwtToken() {
-  final keyId = 'YOUR_KEY_ID';
-  final issuerId = 'YOUR_ISSUER_ID';
-  final privateKey = 'YOUR_PRIVATE_KEY';
+  final keyId = '5HKD45XYDJ';
+  final issuerId = '78e54f4b-f19f-4873-bab5-fb16e545e2aa';
+  final privateKey = """-----BEGIN PRIVATE KEY-----
+MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgawHis1W4+tKTS5f9
+Rl246oRJ61OgFZ3OP75uNzImm/2gCgYIKoZIzj0DAQehRANCAASK14sSV17h4XRF
+3qKj3B7dCbZUY4hCKfAohKttTQR6etuyhWAAuIK6wCdph+hHqiyeKnqd/kYIjEAa
+z3u5SNF6
+-----END PRIVATE KEY-----""";
 
   final header = {
     'alg': 'ES256',
