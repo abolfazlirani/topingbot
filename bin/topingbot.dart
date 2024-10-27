@@ -53,7 +53,7 @@ Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
         "relationships": {
           "betaGroups": {
             "data": [
-              {"type": "betaGroups", "id": "BETA_GROUP_ID"}
+              {"type": "betaGroups", "id": "27592096-30f6-4235-9754-9a4fcca803d1"}
             ]
           }
         }
