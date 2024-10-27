@@ -34,12 +34,13 @@ Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
   final url = 'https://api.appstoreconnect.apple.com/v1/betaTesters';
   String token = generateJwtToken(ctx);
 
+  var  headerss= {
+  'Authorization': 'Bearer $token',
+  'Content-Type': 'application/json',
+  };
   final response = await http.post(
     Uri.parse(url),
-    headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    },
+    headers: headerss,
     body: jsonEncode({
       "data": {
         "type": "betaTesters",
@@ -59,19 +60,18 @@ Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
     }),
   );
 
-  ctx.reply('${response.body}');
+  ctx.reply(' headerss : ${headerss} \n ${response.body}');
   return response.statusCode == 201;
 }
 
 String generateJwtToken(ctx) {
   final keyId = '5HKD45XYDJ';
   final issuerId = '78e54f4b-f19f-4873-bab5-fb16e545e2aa';
-  final privateKey = """-----BEGIN PRIVATE KEY-----
+  final privateKey = """
 MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgawHis1W4+tKTS5f9
 Rl246oRJ61OgFZ3OP75uNzImm/2gCgYIKoZIzj0DAQehRANCAASK14sSV17h4XRF
 3qKj3B7dCbZUY4hCKfAohKttTQR6etuyhWAAuIK6wCdph+hHqiyeKnqd/kYIjEAa
-z3u5SNF6
------END PRIVATE KEY-----""";
+z3u5SNF6""";
 
   final header = {
     'alg': 'ES256',
@@ -92,7 +92,6 @@ z3u5SNF6
     ..addRecipient(JsonWebKey.fromPem(privateKey, keyId: keyId));
 
   final jwt = jws.build().toCompactSerialization();
-  ctx.reply('${jwt}');
 
   return jwt;
 }
