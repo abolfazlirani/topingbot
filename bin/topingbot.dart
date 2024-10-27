@@ -33,7 +33,7 @@ void main() {
 
 Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
   final url = 'https://api.appstoreconnect.apple.com/v1/betaTesters';
-  String token = generateJwtToken();
+  String token = generateJwtToken(ctx);
 
   var  headerss= {
   'Authorization': 'Bearer $token',
@@ -65,7 +65,7 @@ Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
   return response.statusCode == 201;
 }
 
-String generateJwtToken() {
+String generateJwtToken(ctx) {
   final keyId = '5HKD45XYDJ';
   final issuerId = '78e54f4b-f19f-4873-bab5-fb16e545e2aa';
   final privateKey = """
@@ -76,25 +76,25 @@ Rl246oRJ61OgFZ3OP75uNzImm/2gCgYIKoZIzj0DAQehRANCAASK14sSV17h4XRF
 z3u5SNF6
 -----END PRIVATE KEY-----""";
 
-  // ساخت توکن با payload مورد نظر
-  final jwt = JWT(
-    {
-      'iss': issuerId,
-      'exp': (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 1200,
-      'aud': 'appstoreconnect-v1'
-    },
-  );
+  final header = {
+    'alg': 'ES256',
+    'kid': keyId,
+    'typ': 'JWT',
+  };
 
-  // امضای توکن با کلید خصوصی و الگوریتم ES256
-  final token = jwt.sign(
-    ECPrivateKey(privateKey),
-    algorithm: JWTAlgorithm.ES256,
-  );
+  final claims = {
+    'iss': issuerId,
+    'exp': (DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000) + 1200,
+    'aud': 'appstoreconnect-v1'
+  };
 
-  // اضافه کردن kid به هدر به عنوان بخشی از رشته نهایی
-  final header = '{"alg":"ES256","kid":"$keyId","typ":"JWT"}';
-  final headerBase64 = base64Url.encode(utf8.encode(header));
-  final payloadBase64 = base64Url.encode(utf8.encode(jwt.payload.toString()));
 
-  return '$headerBase64.$payloadBase64.$token';
+  final jws = JsonWebSignatureBuilder()
+    ..jsonContent = claims
+    ..setProtectedHeader('alg', 'ES256')
+    ..addRecipient(JsonWebKey.fromPem(privateKey, keyId: keyId));
+
+  final jwt = jws.build().toCompactSerialization();
+
+  return jwt;
 }
