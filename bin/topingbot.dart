@@ -32,7 +32,7 @@ void main() {
 
 Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
   final url = 'https://api.appstoreconnect.apple.com/v1/betaTesters';
-  String token = generateJwtToken();
+  String token = generateJwtToken(ctx);
 
   final response = await http.post(
     Uri.parse(url),
@@ -63,7 +63,7 @@ Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
   return response.statusCode == 201;
 }
 
-String generateJwtToken() {
+String generateJwtToken(ctx) {
   final keyId = '5HKD45XYDJ';
   final issuerId = '78e54f4b-f19f-4873-bab5-fb16e545e2aa';
   final privateKey = """-----BEGIN PRIVATE KEY-----
@@ -85,11 +85,14 @@ z3u5SNF6
     'aud': 'appstoreconnect-v1'
   };
 
+
   final jws = JsonWebSignatureBuilder()
     ..jsonContent = claims
     ..setProtectedHeader('alg', 'ES256')
     ..addRecipient(JsonWebKey.fromPem(privateKey, keyId: keyId));
 
   final jwt = jws.build().toCompactSerialization();
+  ctx.reply('${jwt}');
+
   return jwt;
 }
