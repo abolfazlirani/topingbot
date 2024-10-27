@@ -16,7 +16,7 @@ void main() {
     if (email != null && email.contains('@')) {
       ctx.reply('ایمیل شما ثبت شد. ارسال دعوت‌نامه...');
 
-      bool success = await sendInvitationToTestFlight(email);
+      bool success = await sendInvitationToTestFlight(email,ctx);
       if (success) {
         ctx.reply('دعوت‌نامه به ایمیل $email ارسال شد!');
       } else {
@@ -30,7 +30,7 @@ void main() {
   bot.start();
 }
 
-Future<bool> sendInvitationToTestFlight(String email) async {
+Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
   final url = 'https://api.appstoreconnect.apple.com/v1/betaTesters';
   String token = generateJwtToken();
 
@@ -59,6 +59,7 @@ Future<bool> sendInvitationToTestFlight(String email) async {
     }),
   );
 
+  ctx.reply('${response.body}');
   return response.statusCode == 201;
 }
 
