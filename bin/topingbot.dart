@@ -61,7 +61,6 @@ Future<bool> sendInvitationToTestFlight(String email, Context ctx) async {
     }),
   );
 
-  ctx.reply(' headerss : ${headerss} \n ${response.body}');
   return response.statusCode == 201;
 }
 
